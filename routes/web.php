@@ -20,6 +20,7 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+Route::get('/', [EventController::class, 'index']);
 Route::resource('/events', EventController::class);
 
 require __DIR__.'/auth.php';

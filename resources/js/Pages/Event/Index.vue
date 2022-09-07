@@ -2,9 +2,18 @@
     import { Head, Link } from '@inertiajs/inertia-vue3';
     import BreezeGuestLayout from '@/Layouts/Guest.vue';
     import { Inertia } from '@inertiajs/inertia';
+    import { ref, onMounted } from 'vue'
 
     const props = defineProps({
         events: Object,
+        can: Boolean,
+        catsFact: String,
+    })
+
+    const fact = ref();
+
+    onMounted(() => {
+        fact.value = (JSON.parse(props.catsFact)).data[0];
     })
 
     function deleteEvent(id){
@@ -19,8 +28,23 @@
         <Head title="Events" />
 
         <div class="p-8 mx-auto">
+            <div v-if="props.catsFact" class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative" role="alert">
+                <span class="block sm:inline">{{ fact }}</span>
+                <span class="absolute top-0 bottom-0 right-0 px-4 py-3">
+                    <svg class="fill-current h-6 w-6 text-blue-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
+                </span>
+            </div>
             <div class="flex justify-end mt-8 overflow-hidden">
-                <Link :href="route('events.create')" class="inline-flex items-center px-4 py-2 mx-2 font-bold text-gray-800 bg-gray-100 rounded hover:bg-gray-400">
+                <div class="hidden fixed top-0 right-0 px-6 py-4 sm:block">
+                    <Link v-if="$page.props.auth.user" :href="route('logout')" method="post" as="button" class="text-sm text-gray-700 dark:text-gray-500 underline">Logout</Link>
+
+                    <template v-else>
+                        <Link :href="route('login')" class="text-sm text-gray-700 dark:text-gray-500 underline">Log in</Link>
+
+                        <Link :href="route('register')" class="ml-4 text-sm text-gray-700 dark:text-gray-500 underline">Register</Link>
+                    </template>
+                </div>
+                <Link v-if="can" :href="route('events.create')" class="inline-flex items-center px-4 py-2 mx-2 font-bold text-gray-800 bg-gray-100 rounded hover:bg-gray-400">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                     </svg>
@@ -36,7 +60,7 @@
                             <th class="pl-5">Slug</th>
                             <th class="pl-5">Created At</th>
                             <th class="pl-5">Update At</th>
-                            <th class="pl-5">Action</th>
+                            <th v-if="can" class="pl-5">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -46,7 +70,7 @@
                             <td class="pl-5">{{ event.slug }}</td>
                             <td class="pl-5">{{ event.created_at }}</td>
                             <td class="pl-5">{{ event.updated_at }}</td>
-                            <td class="flex justify-between pl-5">
+                            <td v-if="can" class="flex justify-between pl-5">
                                 <Link :href="route('events.show', event.id)" class="inline-flex items-center px-4 py-2 mx-2 font-bold text-gray-800 bg-gray-100 rounded hover:bg-gray-400">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />

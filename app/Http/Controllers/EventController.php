@@ -3,10 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\EventRequest;
+use App\Mail\EventCreated;
 use App\Models\Event;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -21,6 +26,14 @@ class EventController extends Controller
     public function index()
     {
         $data['events'] = Event::get();
+        $data['can'] = Auth::check();
+        $data['catsFact'] = '';
+        try {
+            $response = Http::get('https://meowfacts.herokuapp.com/');
+            $data['catsFact'] = $response->body();
+        } catch (Exception $exception) {
+            Log::error($exception->getMessage());
+        }
         return Inertia::render('Event/Index', $data);
     }
 
@@ -43,11 +56,12 @@ class EventController extends Controller
     public function store(EventRequest $request)
     {
         try {
-            Event::create([
+            $event = Event::create([
                 'id' => Str::uuid(),
                 'name' => $request->name,
                 'slug' => $request->slug
             ]);
+            Mail::send(new EventCreated($event));
         } catch (Exception $exception) {
             Log::error($exception->getMessage());
         }
@@ -62,7 +76,9 @@ class EventController extends Controller
      */
     public function show($id)
     {
-        $data['event'] = Event::where('id', $id)->first();
+        $data['event'] = Cache::remember('event:'.$id, env('REDIS_TTL'), function () use ($id) {
+            return Event::where('id', $id)->first();
+        });
         return Inertia::render('Event/Show', $data);
     }
 

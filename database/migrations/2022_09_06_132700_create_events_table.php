@@ -14,11 +14,12 @@ return new class extends Migration
     public function up()
     {
         Schema::create('events', function (Blueprint $table) {
-            $table->uuid('id')->unique();
+            $table->uuid('id')->primary();
             $table->string('name', 150);
-            $table->string('slug')->unique();
+            $table->string('slug');
             $table->timestamps();
             $table->softDeletes();
+            $table->unique(['id', 'slug']);
         });
     }
 

@@ -43,10 +43,10 @@ class EventController extends Controller
         }
     }
 
-    public function put(EventRequest $request){
+    public function put($id, EventRequest $request){
         try {
             $event = Event::updateOrCreate(
-                ['id' => $request->id],
+                ['id' => $id],
                 [
                     'name' => $request->name,
                     'slug' => $request->slug

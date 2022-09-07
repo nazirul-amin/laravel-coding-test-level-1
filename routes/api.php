@@ -24,7 +24,7 @@ Route::prefix('v1/events')->name('events.')->group(function () {
     Route::get('/active-events', [EventController::class, 'active'])->name('active');
     Route::get('/{id}', [EventController::class, 'get'])->name('get');
     Route::post('/', [EventController::class, 'store'])->name('post');
-    Route::put('/', [EventController::class, 'put'])->name('put');
+    Route::put('/{id}', [EventController::class, 'put'])->name('put');
     Route::patch('/{id}', [EventController::class, 'patch'])->name('patch');
     Route::delete('/{id}', [EventController::class, 'delete'])->name('delete');
 });

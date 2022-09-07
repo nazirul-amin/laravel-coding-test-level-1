@@ -9,21 +9,28 @@ use App\Http\Resources\Api\EventResource;
 use App\Models\Event;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class EventController extends Controller
 {
     public function index(){
-        return new EventCollection(Event::all());
+        return Cache::remember('events_all', env('REDIS_TTL'), function () {
+            return new EventCollection(Event::all());
+        });
     }
 
     public function active(){
-        return new EventCollection(Event::active()->get());
+        return Cache::remember('events_active', env('REDIS_TTL'), function () {
+            return new EventCollection(Event::active()->get());
+        });
     }
 
     public function get($id){
-        return new EventResource(Event::where('id', $id)->first());
+        return Cache::remember('event:'.$id, env('REDIS_TTL'), function () use ($id) {
+            return new EventResource(Event::where('id', $id)->first());
+        });
     }
 
     public function store(EventRequest $request){
